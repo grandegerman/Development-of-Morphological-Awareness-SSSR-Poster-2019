@@ -1,0 +1,175 @@
+---
+title: "SSSR 2019- Analysing the Development of MA in Norwegian Children"
+author: "Germán Grande & Vassiliki Diamanti"
+date: "03-July-2019"
+output: html_document
+---
+
+# Abstract
+*Purpose:* 
+There is evidence that morphology is an organizing principle aiding the decoding, meaning retrieval, and spelling of complex words. Morphological Awareness (MA), conceptualized as the ability to reflect on and manipulate the structure of words, has emerged as a unique early predictor of later reading skills. Among the two most studied domains, inflectional MA seems to be acquired before derivational MA. A distinction has also been adopted between levels of MA, with epilinguistic control as an elementary level of awareness, measured with judgement tasks, and metalinguistic awareness as a reflection of full-blown awareness, measured with production tasks. This study aimed to examine the development of epilinguistic and metalinguistic inflectional and derivational MA from preschool through first grade.
+
+*Method:* 
+The sample included 246 children 5–7 years old, native speakers of Norwegian, from middle-class neighborhoods surrounding Oslo, without any diagnosed developmental delay. Children were individually assessed midyear (December–February) in preschool and first grade. The assessment included a task of epilinguistic awareness of inflections and two tasks of metalinguistic awareness, one each for inflections and derivations.
+Results: Preliminary results from the preschool assessment confirmed that children’s morphological awareness varies in terms of the level of awareness and the type of morphological domain. Following the second assessment, in spring 2019, the rate of development in each task is analyzed longitudinally and comparatively, to document patterns of convergence or divergence among levels and domains. It is expected that attainment of high levels of inflectional MA precede improvements in derivational MA.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MASS)
+library(lme4)
+library(sjPlot)
+```
+
+
+```{r, include=FALSE}
+setwd("N:/Data/Grade 01/Scripts")
+source("preliminaries.R")
+```
+
+```{r, include=FALSE}
+kitemdir <- "N:/Data/Kindergarten/Cohort 1/Item data"
+ima1 <- read.csv(file.path(kitemdir,"Morphological_Awareness.items.csv"),sep=csvsep,dec=".",na="NA",fileEncoding="UTF-8")
+```
+
+```{r,include=FALSE}
+g1itemdir <- "N:/Data/Grade 01/Cohort 1/temporary files"
+ima2 <- read.csv(file.path(g1itemdir,"Morphological_Awareness.items.csv"),sep=csvsep,dec=".",na="NA",fileEncoding="UTF-8")
+ima2 <- na.omit(ima2)
+```
+
+```{r}
+psych::describe(ima1[,-1])
+head(ima2)
+```
+
+```{r}
+kd <- reshape(ima1,direction="long",varying=list(2:ncol(ima1)),timevar="item",v.names="accu",idvar="sID",times=names(ima1)[-1])
+gd <- reshape(ima2,direction="long",varying=list(2:ncol(ima2)),timevar="item",v.names="accu",idvar="sID",times=names(ima2)[-1])
+kd$time <- "K"
+gd$time <- "G"
+head(kd)
+```
+
+```{r}
+mak1 <- rbind(kd,gd)
+mak1$sID <- as.factor(mak1$sID)
+mak1$time <- relevel(as.factor(mak1$time),ref="K")
+attr(mak1,"reshapeLong") <- NULL
+mak1$task <- as.factor(substr(mak1$item,1,7))
+mak1$task <- factor(mak1$task, levels=c("epiinfl","metainf","metader"))
+head(mak1)
+```
+
+```{r, echo= FALSE}
+xtabs(~time+task,mak1)
+xtabs(~item+task+time,mak1)
+```
+
+```{r}
+gl1 <- glmer (accu ~ task*time + (task*time|sID) + (time|item), mak1, family=binomial, contrasts=list(time=contr.sdif, task=contr.sdif))
+
+print(summary(gl1),corr=F)
+```
+```{r}
+library(ggplot2)
+library(ggthemes)
+```
+
+
+```{r, include=FALSE}
+theme17 <- theme(
+    axis.title = element_text(size=12),
+    panel.grid = element_blank() ,
+    panel.background = element_rect( fill = "white", colour = "black") ,
+    legend.title = element_text(size=12),
+    legend.text = element_text(size=12),
+    legend.key = element_rect(fill = "white", colour = "white"),
+    legend.position = "right",
+    legend.justification =  c(0, 0))
+```
+
+```{r}
+plot_model(gl1, type = "pred", terms = c("task", "time"))+ theme17
+```
+
+```{r}
+library(ggeffects)
+```
+
+
+```{r}
+pred4<-as.data.frame(ggeffect(gl1, type = "re", terms = c("time", "task"), interval = "confidence")) 
+
+pred4$time<- c(1, 2, 1, 2, 1, 2)
+
+pred4$group<- c("Epi-inflectional","Epi-inflectional", "Meta-inflectional","Meta-inflectional", "Meta-derivational","Meta-derivational")
+
+pred4$group<-factor(pred4$group, levels = c("Epi-inflectional", "Meta-inflectional", "Meta-derivational"))
+
+pred4
+```
+
+
+```{r, include=FALSE}
+theme_grande2<- theme(
+  plot.title = element_text(size = 25,
+                            hjust = .5),
+  plot.subtitle = element_text(size = 15,
+                               hjust = .5),
+  axis.title.x=element_text(vjust=.5,
+                             size=30,
+                             face = "bold"),
+  legend.title = element_text(size = 15),
+  legend.text = element_text(size=10,
+                             vjust = .5),
+  legend.direction = "horizontal",
+  legend.position = "bottom",
+   plot.margin = unit(c(0.8,0.8,0.8,0.8), "cm"))
+```
+
+
+
+```{r}
+ggplot(pred4, aes(time, predicted, color = group))+
+  geom_point(size= 4, position=position_dodge(0.02)) +
+  geom_line(linetype = 1, size = 2.5, position=position_dodge(0.02))+
+  coord_cartesian(ylim = c(0.1, 1))+
+  scale_y_continuous(breaks= c(0.00, 0.25, 0.50,0.75,1.00),labels = c("0%","25%", "50%", "75%", "100%"))+
+  scale_x_continuous(breaks = c(1,2), labels = c("Preschool", "Grade 1"))+
+  geom_pointrange(aes(ymin=conf.low, ymax= conf.high),alpha = 0.3,  position=position_dodge(0.02))+
+  labs(title= "Estimated Accuracy", 
+       subtitle = "of Morphological Awareness Tasks", 
+       color= "Task",
+       legend.position = "bottom")+
+  xlab(" ")+ylab("Accuracy")+
+  theme_economist() + theme_grande2
+ 
+```
+
+
+```{r}
+plot_model(gl1, type = "est",
+           sort.est = "sort.all",
+           show.values = TRUE, 
+           show.p = TRUE, 
+           grid = FALSE,
+           line.size = 0.6,
+           vline.color = "red",
+           auto.label = TRUE) +
+  labs(title= "Odds ratios of Fixed Effects", 
+       subtitle = "Morphological Awareness Tasks")+
+  font_size(title= 15, labels.x = 10, labels.y = 10)
+```
+
+
+```{r}
+plot_model(gl1, type= "diag")
+```
+
+```{r}
+plot_model(gl1, "re", pred.type = "re") #predicted values conditioned on random effects 
+```
+
