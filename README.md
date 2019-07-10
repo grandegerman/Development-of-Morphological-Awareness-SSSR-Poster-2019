@@ -1,1 +1,9 @@
 # Development-of-Morphological-Awareness-SSSR-Poster-2019
+
+# Abstract
+*Purpose:* 
+There is evidence that morphology is an organizing principle aiding the decoding, meaning retrieval, and spelling of complex words. Morphological Awareness (MA), conceptualized as the ability to reflect on and manipulate the structure of words, has emerged as a unique early predictor of later reading skills. Among the two most studied domains, inflectional MA seems to be acquired before derivational MA. A distinction has also been adopted between levels of MA, with epilinguistic control as an elementary level of awareness, measured with judgement tasks, and metalinguistic awareness as a reflection of full-blown awareness, measured with production tasks. This study aimed to examine the development of epilinguistic and metalinguistic inflectional and derivational MA from preschool through first grade.
+
+*Method:* 
+The sample included 246 children 5–7 years old, native speakers of Norwegian, from middle-class neighborhoods surrounding Oslo, without any diagnosed developmental delay. Children were individually assessed midyear (December–February) in preschool and first grade. The assessment included a task of epilinguistic awareness of inflections and two tasks of metalinguistic awareness, one each for inflections and derivations.
+Results: Preliminary results from the preschool assessment confirmed that children’s morphological awareness varies in terms of the level of awareness and the type of morphological domain. Following the second assessment, in spring 2019, the rate of development in each task is analyzed longitudinally and comparatively, to document patterns of convergence or divergence among levels and domains. It is expected that attainment of high levels of inflectional MA precede improvements in derivational MA.
